@@ -13,7 +13,7 @@ export default async function DashboardPage() {
 
   // Enforce authentication
   if (!userId) {
-    redirect("/sign-in");
+    redirect("/");
   }
 
   // Fetch decks with card counts

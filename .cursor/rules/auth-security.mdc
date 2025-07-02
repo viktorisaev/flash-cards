@@ -12,6 +12,7 @@ This project uses [Clerk](mdc:https:/clerk.com) for authentication and user mana
 - Authentication is configured in [src/middleware.ts](mdc:src/middleware.ts)
 - Protected routes must be wrapped with Clerk's middleware
 - Use Clerk's hooks and components for auth UI
+- Unauthenticated users attempting to access protected routes will be redirected to the homepage ("/") where they can find sign in/sign up buttons
 
 ## Data Access Security Rules
 
@@ -53,7 +54,9 @@ import { auth } from "@clerk/nextjs";
 
 export default async function UserDecks() {
   const { userId } = auth();
-  if (!userId) return null;
+  if (!userId) {
+    redirect("/"); // Redirect to homepage where auth buttons are available
+  }
 
   const decks = await db
     .select()
