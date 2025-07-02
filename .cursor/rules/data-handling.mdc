@@ -1,0 +1,149 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Data Handling and Validation Guidelines
+
+## Server Components for Data Retrieval
+All data retrieval operations must be performed in Server Components:
+
+```typescript
+// ✅ Correct: Data fetching in Server Component
+async function DeckList() {
+  const decks = await db.select().from(decksTable);
+  return <div>{/* Render decks */}</div>;
+}
+
+// ❌ Incorrect: Never fetch data in Client Components
+'use client';
+function DeckList() {
+  const [decks, setDecks] = useState([]);
+  // ❌ Don't fetch data here
+  useEffect(() => {
+    fetch('/api/decks').then(/*...*/);
+  }, []);
+}
+```
+
+## Server Actions for Data Mutations
+All database mutations (INSERT, UPDATE, DELETE) must be handled through Server Actions:
+
+```typescript
+// ✅ Correct: Server Action for data mutation
+export async function createDeck(data: CreateDeckSchema) {
+  'use server';
+  
+  const result = await db.insert(decksTable).values({
+    title: data.title,
+    description: data.description
+  });
+  return result;
+}
+
+// ❌ Incorrect: Never mutate data through API routes or client-side code
+async function handleSubmit() {
+  await fetch('/api/decks', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  });
+}
+```
+
+## Zod Validation and TypeScript Types
+All data passed to Server Actions must be validated using Zod schemas and have corresponding TypeScript types:
+
+```typescript
+// ✅ Correct: Zod schema with TypeScript type
+import { z } from "zod";
+
+const CreateDeckSchema = z.object({
+  title: z.string().min(1).max(100),
+  description: z.string().optional(),
+});
+
+type CreateDeckInput = z.infer<typeof CreateDeckSchema>;
+
+// Server Action with type safety and validation
+export async function createDeck(input: CreateDeckInput) {
+  'use server';
+  
+  // Validate input
+  const result = CreateDeckSchema.safeParse(input);
+  if (!result.success) {
+    throw new Error('Invalid input');
+  }
+  
+  // Proceed with validated data
+  const data = result.data;
+  return await db.insert(decksTable).values(data);
+}
+
+// ❌ Incorrect: Never use FormData or untyped data
+export async function createDeck(formData: FormData) {
+  'use server';
+  // Don't work directly with FormData
+}
+```
+
+## Best Practices
+1. Always define Zod schemas in separate files for reusability
+2. Use `z.infer<typeof Schema>` to generate TypeScript types from Zod schemas
+3. Implement proper error handling for validation failures
+4. Keep validation logic separate from business logic
+5. Use strong typing throughout the application
+
+## Implementation Example
+Here's a complete example of proper data handling:
+
+```typescript
+// schemas/deck.ts
+import { z } from "zod";
+
+export const CreateDeckSchema = z.object({
+  title: z.string().min(1).max(100),
+  description: z.string().optional(),
+});
+
+export type CreateDeckInput = z.infer<typeof CreateDeckSchema>;
+
+// actions/deck.ts
+export async function createDeck(input: CreateDeckInput) {
+  'use server';
+  
+  const result = CreateDeckSchema.safeParse(input);
+  if (!result.success) {
+    throw new Error(`Validation failed: ${result.error.message}`);
+  }
+  
+  try {
+    return await db.insert(decksTable).values(result.data);
+  } catch (error) {
+    throw new Error('Failed to create deck');
+  }
+}
+
+// components/DeckForm.tsx
+'use client';
+
+export function DeckForm() {
+  async function onSubmit(data: CreateDeckInput) {
+    try {
+      await createDeck(data);
+    } catch (error) {
+      // Handle error
+    }
+  }
+  
+  return (
+    <form>{/* Form implementation */}</form>
+  );
+}
+```
+
+Remember:
+- Never use API routes for data operations that can be handled by Server Actions
+- Always validate data before processing
+- Maintain strict TypeScript types throughout the application
+- Handle errors appropriately at both validation and execution levels
+

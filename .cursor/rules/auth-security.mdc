@@ -1,0 +1,96 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Authentication and Data Security Guidelines
+
+This project uses [Clerk](mdc:https:/clerk.com) for authentication and user management. All data access must be properly secured to ensure users can only access their own data.
+
+## Authentication Setup
+
+- Authentication is configured in [src/middleware.ts](mdc:src/middleware.ts)
+- Protected routes must be wrapped with Clerk's middleware
+- Use Clerk's hooks and components for auth UI
+
+## Data Access Security Rules
+
+### 1. User Data Access
+- Every database table containing user-specific data MUST have a `userId` column
+- All queries MUST include a `userId` filter matching the current user
+- Never expose endpoints that allow querying without `userId` filters
+
+### 2. API Route Security
+
+```typescript
+// ✅ Correct way - Always verify user and filter by userId
+import { auth } from "@clerk/nextjs";
+
+export async function GET() {
+  const { userId } = auth();
+  if (!userId) return new Response("Unauthorized", { status: 401 });
+
+  const data = await db
+    .select()
+    .from(decksTable)
+    .where(eq(decksTable.userId, userId));
+
+  return Response.json(data);
+}
+
+// ❌ Wrong way - Never query without userId filter
+export async function GET() {
+  const data = await db.select().from(decksTable); // SECURITY RISK!
+  return Response.json(data);
+}
+```
+
+### 3. Server Components
+
+```typescript
+// ✅ Correct way - Always check auth and filter data
+import { auth } from "@clerk/nextjs";
+
+export default async function UserDecks() {
+  const { userId } = auth();
+  if (!userId) return null;
+
+  const decks = await db
+    .select()
+    .from(decksTable)
+    .where(eq(decksTable.userId, userId));
+
+  return <DecksList decks={decks} />;
+}
+```
+
+### 4. Database Queries
+- Always use Drizzle's query builder with proper userId filters
+- Never use raw SQL queries that could bypass security filters
+- Include userId in all INSERT operations
+
+## Security Checklist
+
+1. ✅ All routes protected by Clerk middleware
+2. ✅ userId filter on all database queries
+3. ✅ No raw SQL queries
+4. ✅ Auth check at the start of all protected routes
+5. ✅ userId included in all data creation
+6. ✅ No client-side data filtering for security
+
+## Error Handling
+
+```typescript
+// Always return proper error responses for unauthorized access
+if (!userId) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+// For forbidden actions (wrong user)
+if (deck.userId !== userId) {
+  return new Response("Forbidden", { status: 403 });
+}
+```
+
+Remember: Security is non-negotiable. Always verify user authentication and authorization before any data access or modification.
+

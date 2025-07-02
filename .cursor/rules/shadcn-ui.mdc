@@ -1,0 +1,43 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# shadcn/ui Components Usage Guide
+
+This project uses [shadcn/ui](mdc:https:/ui.shadcn.com) for UI components. The configuration is defined in [components.json](mdc:components.json).
+
+## Configuration
+- Style: New York
+- Base Color: Neutral
+- Using React Server Components (RSC)
+- TypeScript with TSX
+- Using Lucide icons
+
+## Component Installation
+To add a new shadcn/ui component, use the following command:
+```bash
+npx shadcn@latest add <component-name>
+```
+
+Example:
+```bash
+npx shadcn@latest add button
+```
+
+## Component Locations
+- UI Components: `@/components/ui`
+- Utility Functions: `@/lib/utils`
+- Custom Components: `@/components`
+- Custom Hooks: `@/hooks`
+
+## Best Practices
+1. Always check if a component is already installed before adding it
+2. Use the provided aliases in imports:
+   ```tsx
+   import { Button } from "@/components/ui/button"
+   import { cn } from "@/lib/utils"
+   ```
+3. Follow the [shadcn/ui documentation](mdc:https:/ui.shadcn.com/docs) for component customization
+4. CSS variables and styling are configured in [src/app/globals.css](mdc:src/app/globals.css)
+

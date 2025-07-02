@@ -1,0 +1,60 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Database Interaction Guidelines
+
+This project uses Drizzle ORM for all database interactions. The schema is defined in [src/db/schema.ts](mdc:src/db/schema.ts).
+
+## Schema Structure
+- Tables are defined using `pgTable` from Drizzle
+- Current tables:
+  - `decksTable`: Stores flashcard decks
+  - `cardsTable`: Stores individual cards within decks
+
+## Required Practices
+1. Always import schema tables from `src/db/schema.ts`:
+   ```typescript
+   import { decksTable, cardsTable } from "@/db/schema";
+   ```
+
+2. Use Drizzle's query builder for all database operations:
+   ```typescript
+   // ✅ Correct way
+   const decks = await db.select().from(decksTable);
+   
+   // ❌ Never use raw SQL or other query methods
+   const decks = await sql`SELECT * FROM decks`;
+   ```
+
+3. For relationships, use the defined foreign keys:
+   ```typescript
+   // Example: Getting cards for a deck
+   const cards = await db
+     .select()
+     .from(cardsTable)
+     .where(eq(cardsTable.deckId, deckId));
+   ```
+
+4. Always handle database operations asynchronously using async/await
+
+## Database Client
+- Database connection is configured in [src/db/index.ts](mdc:src/db/index.ts)
+- Always import the database client from this file:
+  ```typescript
+  import { db } from "@/db";
+  ```
+
+## Type Safety
+- Leverage TypeScript and Drizzle's type inference
+- Use Drizzle's built-in types for query results
+- Never use `any` type with database operations
+
+## Error Handling
+- Always wrap database operations in try-catch blocks
+- Use appropriate error handling for database operations
+- Log database errors appropriately
+
+Remember: Raw SQL queries are strictly prohibited. All database interactions must go through Drizzle's query builder to ensure type safety and maintainability.
+
