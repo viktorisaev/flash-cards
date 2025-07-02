@@ -147,3 +147,137 @@ Remember:
 - Maintain strict TypeScript types throughout the application
 - Handle errors appropriately at both validation and execution levels
 
+# Database Interaction Guidelines
+
+This project uses Drizzle ORM for all database interactions. The schema is defined in [src/db/schema.ts](mdc:src/db/schema.ts) and all database queries are centralized in the [src/db/queries](mdc:src/db/queries) directory.
+
+## Directory Structure
+```
+src/db/
+  ├── schema.ts    # Database schema definitions
+  ├── index.ts     # Database client configuration
+  └── queries/     # Centralized query functions
+      ├── decks.ts # Deck-related queries
+      ├── cards.ts # Card-related queries
+      └── types.ts # Shared types for queries
+```
+
+## Required Practices
+
+1. All database queries MUST be defined in the `src/db/queries` directory:
+   ```typescript
+   // src/db/queries/decks.ts
+   import { db } from "@/db";
+   import { decksTable } from "@/db/schema";
+   
+   export async function getDecksByUserId(userId: string) {
+     return db
+       .select()
+       .from(decksTable)
+       .where(eq(decksTable.userId, userId));
+   }
+   ```
+
+2. Components and API routes MUST use query functions instead of direct database access:
+   ```typescript
+   // ✅ Correct way - Using query function
+   import { getDecksByUserId } from "@/db/queries/decks";
+   
+   export async function GET() {
+     const { userId } = auth();
+     if (!userId) return new Response("Unauthorized", { status: 401 });
+   
+     const decks = await getDecksByUserId(userId);
+     return Response.json(decks);
+   }
+   
+   // ❌ Wrong way - Direct database access
+   export async function GET() {
+     const { userId } = auth();
+     if (!userId) return new Response("Unauthorized", { status: 401 });
+   
+     const decks = await db
+       .select()
+       .from(decksTable)
+       .where(eq(decksTable.userId, userId));
+     return Response.json(decks);
+   }
+   ```
+
+3. Query Function Requirements:
+   - Must be properly typed using TypeScript
+   - Must include userId parameter for user-specific data
+   - Must use Drizzle's query builder (no raw SQL)
+   - Must handle relationships using defined foreign keys
+   - Must be named descriptively (e.g., `getDecksByUserId`, `createCard`)
+   - Must be exported as named exports (not default exports)
+
+4. Query Function Organization:
+   - Group related queries in domain-specific files (e.g., `decks.ts`, `cards.ts`)
+   - Use `types.ts` for shared TypeScript types and interfaces
+   - Keep functions focused and single-purpose
+   - Document complex queries with JSDoc comments
+
+## Error Handling
+
+Query functions should handle errors consistently:
+
+```typescript
+// src/db/queries/decks.ts
+export async function createDeck(data: CreateDeckInput) {
+  try {
+    const deck = await db.insert(decksTable).values(data).returning();
+    return { deck, error: null };
+  } catch (error) {
+    console.error("Failed to create deck:", error);
+    return { deck: null, error: "Failed to create deck" };
+  }
+}
+```
+
+## Type Safety
+
+1. Define input/output types for all query functions:
+   ```typescript
+   // src/db/queries/types.ts
+   export interface CreateDeckInput {
+     userId: string;
+     title: string;
+     description?: string;
+   }
+   
+   // src/db/queries/decks.ts
+   import type { CreateDeckInput } from "./types";
+   
+   export async function createDeck(data: CreateDeckInput) {
+     // Implementation
+   }
+   ```
+
+2. Use Drizzle's inferred types where possible:
+   ```typescript
+   import { decksTable } from "@/db/schema";
+   import type { NewDeck } from "@/db/schema";
+   ```
+
+## Prohibited Practices
+
+❌ Direct database access outside of query functions
+❌ Raw SQL queries
+❌ Duplicate query logic across files
+❌ Query functions without proper error handling
+❌ Query functions without TypeScript types
+❌ Default exports for query functions
+
+## Migration Process
+
+When adding new database functionality:
+
+1. Update schema if needed (`schema.ts`)
+2. Create/update query functions in `queries/` directory
+3. Use new query functions in components/routes
+4. Add proper types and error handling
+5. Document complex queries
+
+Remember: All database interactions MUST go through query functions in the `src/db/queries` directory. This ensures consistent error handling, type safety, and maintainability.
+
