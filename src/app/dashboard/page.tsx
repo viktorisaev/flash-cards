@@ -35,7 +35,10 @@ export default async function DashboardPage() {
     <div className={cn("mx-auto py-8 px-4 sm:px-6 lg:px-8 max-w-7xl")}>
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h1 className={cn("scroll-m-20 text-4xl font-bold tracking-tight")}>Dashboard</h1>
+          <div className="space-y-1">
+            <h1 className={cn("scroll-m-20 text-4xl font-bold tracking-tight")}>Dashboard</h1>
+            <p className={cn("text-muted-foreground")}>Manage your flashcard decks and study progress</p>
+          </div>
           <Button asChild>
             <Link href="/decks/new">Create New Deck</Link>
           </Button>
