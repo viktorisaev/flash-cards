@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
 
 export default async function Home() {
   // Check if user is authenticated
@@ -10,20 +12,20 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-8 p-4">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-2">Flashy Cardy</h1>
-        <p className="text-xl text-muted-foreground">Your personal flashcard platform</p>
-      </div>
+    <Card className="mx-auto max-w-lg mt-20">
+      <CardHeader className="text-center">
+        <CardTitle className="text-4xl">Flashy Cardy</CardTitle>
+        <CardDescription className="text-xl">Your personal flashcard platform</CardDescription>
+      </CardHeader>
       
-      <div className="flex gap-4">
-        <Button variant="outline" asChild>
-          <a href="/sign-in">Sign In</a>
-        </Button>
-        <Button asChild>
-          <a href="/sign-up">Sign Up</a>
-        </Button>
-      </div>
-    </div>
+      <CardContent className="flex justify-center gap-4">
+        <SignInButton mode="modal">
+          <Button variant="outline">Sign In</Button>
+        </SignInButton>
+        <SignUpButton mode="modal">
+          <Button>Sign Up</Button>
+        </SignUpButton>
+      </CardContent>
+    </Card>
   );
 }

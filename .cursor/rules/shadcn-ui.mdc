@@ -1,11 +1,20 @@
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # shadcn/ui Components Usage Guide
 
 This project uses [shadcn/ui](mdc:https:/ui.shadcn.com) for UI components. The configuration is defined in [components.json](mdc:components.json).
+
+## CRITICAL RULES
+1. ⚠️ ONLY shadcn/ui components are allowed for UI elements
+2. ⚠️ NO custom UI components should be created
+3. ⚠️ NO direct HTML elements should be used without shadcn/ui wrappers
+4. ⚠️ ALL Clerk authentication must use shadcn/ui components:
+   - Use shadcn/ui Button for sign-in/sign-up triggers
+   - Use shadcn/ui Dialog/Modal for auth flows
+   - Style Clerk components using shadcn/ui className utilities only
 
 ## Configuration
 - Style: New York
@@ -23,12 +32,34 @@ npx shadcn@latest add <component-name>
 Example:
 ```bash
 npx shadcn@latest add button
+npx shadcn@latest add dialog # Required for auth modals
+```
+
+## Component Usage Examples
+
+### Authentication Buttons (Required Pattern)
+```tsx
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+
+export function SignInButton() {
+  return (
+    <Dialog>
+      <Button variant="default" asChild>
+        <DialogTrigger>Sign In</DialogTrigger>
+      </Button>
+      <DialogContent>
+        <SignIn /> {/* Clerk component */}
+      </DialogContent>
+    </Dialog>
+  )
+}
 ```
 
 ## Component Locations
 - UI Components: `@/components/ui`
 - Utility Functions: `@/lib/utils`
-- Custom Components: `@/components`
+- Custom Components: `@/components` (business logic only, NO custom UI)
 - Custom Hooks: `@/hooks`
 
 ## Best Practices
@@ -40,4 +71,12 @@ npx shadcn@latest add button
    ```
 3. Follow the [shadcn/ui documentation](mdc:https:/ui.shadcn.com/docs) for component customization
 4. CSS variables and styling are configured in [src/app/globals.css](mdc:src/app/globals.css)
+
+## Prohibited Practices
+❌ Creating custom UI components
+❌ Using raw HTML elements without shadcn/ui wrappers
+❌ Direct styling without shadcn/ui utilities
+❌ Custom CSS classes (use cn utility instead)
+❌ Inline styles
+❌ Custom button or input implementations
 
