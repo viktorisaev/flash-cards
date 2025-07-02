@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -54,37 +56,44 @@ function formatFullDate(date: Date) {
 
 export function DeckCard({ id, title, description, cardCount = 0, updatedAt }: DeckCardProps) {
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {description && (
-          <CardDescription>{description}</CardDescription>
-        )}
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <span>{cardCount} {cardCount === 1 ? 'card' : 'cards'}</span>
-          <span>•</span>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="cursor-help">Updated {formatDate(updatedAt)}</span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Updated on {formatFullDate(updatedAt)}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </CardContent>
-      <CardFooter className="flex gap-2">
-        <Button asChild className="flex-1">
-          <Link href={`/decks/${id}`}>View Deck</Link>
-        </Button>
-        <Button asChild variant="outline" className="flex-1">
-          <Link href={`/decks/${id}/study`}>Study</Link>
-        </Button>
-      </CardFooter>
-    </Card>
+    <div className="relative">
+      <Link href={`/decks/${id}/study`} className="block">
+        <Card className="hover:shadow-md transition-shadow hover:bg-accent/50 cursor-pointer">
+          <CardHeader>
+            <CardTitle>{title}</CardTitle>
+            {description && (
+              <CardDescription>{description}</CardDescription>
+            )}
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <span>{cardCount} {cardCount === 1 ? 'card' : 'cards'}</span>
+              <span>•</span>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">Updated {formatDate(updatedAt)}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Updated on {formatFullDate(updatedAt)}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <div className="w-full" onClick={(e) => e.preventDefault()}>
+              <Button 
+                variant="outline" 
+                asChild 
+                className="flex-1 w-full"
+              >
+                <Link href={`/decks/${id}`}>View Details</Link>
+              </Button>
+            </div>
+          </CardFooter>
+        </Card>
+      </Link>
+    </div>
   );
 } 
