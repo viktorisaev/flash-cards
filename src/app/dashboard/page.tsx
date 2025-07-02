@@ -5,6 +5,8 @@ import { DeckCard } from "@/components/DeckCard";
 import { db, decksTable, cardsTable } from "@/db";
 import { eq, count } from "drizzle-orm";
 import Link from "next/link";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -30,10 +32,10 @@ export default async function DashboardPage() {
     .orderBy(decksTable.updatedAt);
 
   return (
-    <main className="container mx-auto py-8">
+    <div className={cn("mx-auto py-8 px-4 sm:px-6 lg:px-8 max-w-7xl")}>
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-4xl font-bold">Dashboard</h1>
+          <h1 className={cn("scroll-m-20 text-4xl font-bold tracking-tight")}>Dashboard</h1>
           <Button asChild>
             <Link href="/decks/new">Create New Deck</Link>
           </Button>
@@ -41,12 +43,14 @@ export default async function DashboardPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {decksWithCounts.length === 0 ? (
-            <div className="p-6 border rounded-lg shadow-sm">
-              <h2 className="text-2xl font-semibold mb-2">No Decks Yet</h2>
-              <p className="text-muted-foreground">
-                Create your first flashcard deck to get started!
-              </p>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>No Decks Yet</CardTitle>
+                <CardDescription>
+                  Create your first flashcard deck to get started!
+                </CardDescription>
+              </CardHeader>
+            </Card>
           ) : (
             decksWithCounts.map((deck) => (
               <DeckCard
@@ -61,6 +65,6 @@ export default async function DashboardPage() {
           )}
         </div>
       </div>
-    </main>
+    </div>
   );
 } 
