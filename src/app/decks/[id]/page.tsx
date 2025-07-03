@@ -5,7 +5,7 @@ import { getCardsByDeckId } from "@/db/queries/cards";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { FileEdit } from "lucide-react";
+import { FileEdit, ArrowLeft } from "lucide-react";
 
 interface PageProps {
   params: {
@@ -39,20 +39,29 @@ export default async function DeckPage({ params }: PageProps) {
 
   return (
     <div className="container max-w-6xl py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{deck.title}</h1>
-          {deck.description && (
-            <p className="text-muted-foreground mt-2">{deck.description}</p>
-          )}
-        </div>
-        <div className="flex gap-4">
-          <Button asChild>
-            <Link href={`/decks/${deck.id}/study`}>Study Deck</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href={`/decks/${deck.id}/edit`}>Edit Deck</Link>
-          </Button>
+      <div className="mb-8">
+        <Button variant="ghost" size="sm" asChild className="mb-6">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Dashboard</span>
+          </Link>
+        </Button>
+
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{deck.title}</h1>
+            {deck.description && (
+              <p className="text-muted-foreground mt-2">{deck.description}</p>
+            )}
+          </div>
+          <div className="flex gap-4">
+            <Button asChild>
+              <Link href={`/decks/${deck.id}/study`}>Study Deck</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href={`/decks/${deck.id}/edit`}>Edit Deck</Link>
+            </Button>
+          </div>
         </div>
       </div>
 
